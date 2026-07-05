@@ -8,7 +8,7 @@
 <meta property="og:title" content="The Lamp & the Machine — Sora × Azure Shadow-Puppet Film Studio" />
 <meta property="og:description" content="Togalu Gombeyaata meets generative AI: Sora 2 visuals, Azure neural voices, Demucs music-preserving re-voicing, and the story of Kempegowda." />
 <meta property="og:type" content="article" />
-<meta property="og:image" content="assets/img/hero.jpg" />
+<meta property="og:image" content="assets/img/banner.jpg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Marcellus&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -133,6 +133,9 @@ li::marker{color:var(--ember)}
 .cut .meta p{margin:0; font-size:.92rem; color:var(--muted)}
 .cut .tag{display:inline-block; font-family:var(--label); letter-spacing:1.5px; text-transform:uppercase;
   font-size:.66rem; color:var(--night); background:var(--amber); padding:3px 9px; border-radius:6px; margin-bottom:.5rem}
+.feature{margin:2rem 0; border-color:var(--line2);
+  box-shadow:0 0 54px rgba(240,169,75,.15), 0 18px 50px rgba(0,0,0,.5)}
+.feature .tag{background:linear-gradient(90deg,var(--gold),var(--amber))}
 
 /* ---------- changelog timeline ---------- */
 .timeline{position:relative; margin:2rem 0; padding-left:30px}
@@ -248,7 +251,29 @@ footer a{color:var(--amber)}
       <div class="meta"><span class="tag">Cut 4 · flagship</span><h4>DragonHD — most natural</h4><p>Azure's ultra-realistic DragonHD voices. The most soothing, zero time-stretching.</p></div>
     </div>
   </div>
-  <p class="note">These are compressed 480p previews, self-hosted so the page works out of the box. Higher-quality versions are on their way to YouTube — the embeds will be swapped for the links.</p>
+  <p class="note">These are compressed 480p previews, self-hosted so the page works out of the box. The complete branded episode below is that same DragonHD cut — now with its opening jingle in front and end-credits at the close.</p>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <span class="label">The Finale</span>
+  <h2>The Finished Episode — jingle in front, credits at the end</h2>
+  <p>The four voices were the middle of the tale. To make it a <em>channel</em>, I built a third skill — <code>togalu-brand-bumpers</code> — that tops and tails any film with a generated opening jingle and a scrolling end-credits. The ident holds on the <strong>Togalu Gombe Aata</strong> medallion, then the backlit screen <em>parts open</em> like a curtain onto a Sora journey — a leather map of India gliding to a Karnataka sunset, the theatre rising, and a hand-perforated leather <strong>Ganesha</strong> entering in invocation. The channel's name is spoken in Kannada — <span lang="kn">ತೊಗಲು ಗೊಂಬೆ ಆಟ</span> — by a native voice. Then the film plays, and the credits roll to a <em>Directed by</em> card.</p>
+
+  <div class="cut feature">
+    <video controls preload="none" poster="assets/img/banner.jpg" src="assets/video/branded-episode.mp4"></video>
+    <div class="meta"><span class="tag">The complete episode</span><h4>Kempegowda — the branded cut</h4><p>Opening jingle · the five-minute film · scrolling end-credits — one continuous cut, normalized to −14 LUFS. About 5½ minutes.</p></div>
+  </div>
+
+  <div class="cuts">
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/rises.jpg" src="assets/video/opening-jingle.mp4"></video>
+      <div class="meta"><span class="tag">Opening jingle</span><h4>Medallion → the screen opens → Ganesha</h4><p>The 12-second channel ident: a leather map of India, a shadow-play sunset, the theatre rising, and a perforated-leather Ganesha invocation — scored with a folk sting.</p></div>
+    </div>
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/gratitude.jpg" src="assets/video/end-credits.mp4"></video>
+      <div class="meta"><span class="tag">End credits</span><h4>The roll &amp; the director card</h4><p>Roles scroll over a dimmed backlit stage and settle on a prominent “Directed by Naveen Gopalakrishna”.</p></div>
+    </div>
+  </div>
 
   <div class="divider"><i class="flame"></i></div>
 
@@ -310,6 +335,25 @@ footer a{color:var(--amber)}
     <div class="step"><h4>12 · Added DragonHD + wrote the recipes <span class="pill">docs</span></h4>
       <p class="file">SKILL.md · schema · examples</p>
       <p>Discovered DragonHD voices honor prosody but ignore express-as styles (and need no time-stretch). Folded the casting, alternating/unison, anti-robotic prosody, and full-film-span QA lessons into the skill.</p></div>
+  </div>
+
+  <h3>Skill 3 — <code>togalu-brand-bumpers</code> (opening jingle &amp; end credits)</h3>
+  <div class="timeline">
+    <div class="step"><h4>13 · A studio ident that opens like a curtain <span class="pill">new skill</span></h4>
+      <p class="file">scripts/make_intro.py · layout "open"</p>
+      <p>The logo medallion holds on a dim shadow-screen, then an FFmpeg <code>horzopen</code> transition parts the screen to reveal the Sora invocation — a proper title-sequence built from the exact brand PNG so the mark stays razor-sharp.</p></div>
+    <div class="step"><h4>14 · Said the channel's name in Kannada <span class="pill">localization</span></h4>
+      <p class="file">scripts/brand_tts.py · brand.json "spoken"</p>
+      <p>An English voice mangled “Togalu Gombe Aata”. Fix: write the name in Kannada script (<span lang="kn">ತೊಗಲು ಗೊಂಬೆ ಆಟ</span>) and speak it with a Kannada voice, then the English descriptor in DragonHD — each segment in its own voice and <code>xml:lang</code>.</p></div>
+    <div class="step"><h4>15 · A scrolling credits roll + a director card <span class="pill">feature</span></h4>
+      <p class="file">scripts/make_credits.py</p>
+      <p>Pillow renders the credit strip (long lines auto-wrap); it scrolls over a dimmed backlit stage and settles on a prominent “Directed by Naveen Gopalakrishna” hold card.</p></div>
+    <div class="step"><h4>16 · Split the jingle for an authentic Ganesha <span class="pill">art direction</span></h4>
+      <p class="file">versions/v3 · clip A + clip B</p>
+      <p>v2's Ganesha read cartoonish. v3 splits generation: a custom-prompt journey (map → Karnataka → sunset → the theatre rises) crossfades into a Ganesha rendered through the film generator's anti-cartoon leather-puppet styling — scored with v2's music, which I kept.</p></div>
+    <div class="step"><h4>17 · Made every export actually play <span class="pill">bug</span></h4>
+      <p class="file">assemble.py · make_intro / make_credits</p>
+      <p>Windows refused the first branded cut (0x80004005): the FFmpeg xfade chain had emitted H.264 <em>4:4:4</em> plus 96&nbsp;kHz audio. Forced <code>yuv420p</code> (4:2:0) + faststart + 48&nbsp;kHz on every final encode; −14 LUFS throughout. Every version is archived under <code>versions/</code>.</p></div>
   </div>
 
   <figure><img src="assets/img/mosaic.jpg" alt="A 5x5 contact sheet of all 25 shadow-puppet scenes"><figcaption>The QA contact sheet — one frame from each of the 25 scenes, checked for consistency at a glance.</figcaption></figure>
