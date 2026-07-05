@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Lamp &amp; the Machine — Sora × Azure Multi-Part Video Editing</title>
+<meta name="description" content="How I turned Togalu Gombeyaata — Karnataka's leather shadow-puppet art — into an AI film studio with Sora 2 and Azure, and told the story of Kempegowda, founder of Bengaluru. Four narration cuts, a reusable voice-dub skill, and every step of the build." />
+<meta property="og:title" content="The Lamp & the Machine — Sora × Azure Shadow-Puppet Film Studio" />
+<meta property="og:description" content="Togalu Gombeyaata meets generative AI: Sora 2 visuals, Azure neural voices, Demucs music-preserving re-voicing, and the story of Kempegowda." />
+<meta property="og:type" content="article" />
+<meta property="og:image" content="assets/img/hero.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Marcellus&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#150c06; --night2:#1f130a; --panel:#241608; --panel2:#2c1b0c;
+  --ember:#e2662d; --amber:#f0a94b; --gold:#f6cd76; --red:#c0432a;
+  --cream:#f6e6c8; --parch:#f3ddb2; --leather:#c08a45;
+  --text:#efd9b4; --muted:#c6a374; --line:rgba(240,169,75,.22); --line2:rgba(240,169,75,.4);
+  --display:'Cormorant Garamond',Georgia,serif; --label:'Marcellus',serif; --body:'Spectral',Georgia,serif;
+  --wrap:820px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text); font-family:var(--body); line-height:1.85; font-size:19px;
+  background:
+    radial-gradient(1100px 700px at 50% -8%, rgba(240,169,75,.14), transparent 60%),
+    radial-gradient(900px 600px at 8% 22%, rgba(226,102,45,.10), transparent 55%),
+    radial-gradient(900px 700px at 100% 60%, rgba(192,67,42,.08), transparent 55%),
+    linear-gradient(180deg,var(--night),var(--night2));
+  background-attachment:fixed; -webkit-font-smoothing:antialiased;
+}
+/* faint perforated-leather texture */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.5;
+  background-image:radial-gradient(rgba(240,169,75,.05) 1px, transparent 1.4px);
+  background-size:22px 22px;
+}
+a{color:var(--gold); text-decoration:none; border-bottom:1px solid var(--line2)}
+a:hover{color:var(--amber)}
+.wrap{max-width:var(--wrap); margin:0 auto; padding:0 24px}
+h1,h2,h3{font-family:var(--display); font-weight:700; color:var(--gold); line-height:1.15; letter-spacing:.3px}
+h2{font-size:2.2rem; margin:2.6em 0 .5em}
+h3{font-size:1.5rem; color:var(--amber); margin:2em 0 .3em}
+p{margin:0 0 1.2em}
+strong{color:var(--cream)}
+em{color:var(--amber)}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative; min-height:88vh; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:0 0 3.2rem; overflow:hidden; text-align:center;
+  background:linear-gradient(180deg, rgba(21,12,6,.35) 0%, rgba(21,12,6,.55) 45%, rgba(21,12,6,.96) 100%), url('assets/img/hero.jpg') center 30%/cover no-repeat;
+  border-bottom:1px solid var(--line);
+}
+.hero .kicker{
+  font-family:var(--label); letter-spacing:5px; text-transform:uppercase; font-size:.78rem;
+  color:var(--amber); background:rgba(21,12,6,.5); border:1px solid var(--line2);
+  padding:8px 18px; border-radius:999px; display:inline-block; margin-bottom:1.1rem; backdrop-filter:blur(4px);
+}
+.hero h1{
+  font-size:clamp(2.7rem,7vw,5rem); margin:0 0 .3em; color:#fff2d8;
+  text-shadow:0 2px 30px rgba(226,102,45,.55), 0 0 2px rgba(0,0,0,.6);
+}
+.hero .sub{
+  max-width:640px; margin:0 auto; font-size:1.18rem; color:var(--cream); font-style:italic;
+  text-shadow:0 1px 12px rgba(0,0,0,.7);
+}
+.hero .byline{margin-top:1.3rem; font-family:var(--label); letter-spacing:2px; font-size:.8rem; color:var(--muted); text-transform:uppercase}
+
+/* oil-lamp row */
+.lamps{display:flex; justify-content:center; gap:26px; margin:1.7rem 0 .2rem; flex-wrap:wrap}
+.lamp{width:16px; height:26px; position:relative}
+.lamp::before{content:""; position:absolute; bottom:0; left:1px; width:14px; height:9px; border-radius:0 0 8px 8px; background:linear-gradient(#a5641f,#5c360f)}
+.lamp::after{content:""; position:absolute; bottom:8px; left:6px; width:5px; height:13px; border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%, #fff3c4, var(--amber) 55%, var(--ember) 85%, transparent);
+  box-shadow:0 0 14px 4px rgba(240,169,75,.6); animation:flick 2.6s ease-in-out infinite}
+.lamp:nth-child(2n)::after{animation-delay:-.8s}
+.lamp:nth-child(3n)::after{animation-delay:-1.5s}
+@keyframes flick{0%,100%{transform:scaleY(1) translateX(0);opacity:1}50%{transform:scaleY(.86) translateX(.5px);opacity:.82}}
+
+/* ---------- content ---------- */
+.lede{font-size:1.3rem; color:var(--cream); font-style:italic; margin:2.4rem 0 1.6rem}
+.label{font-family:var(--label); letter-spacing:4px; text-transform:uppercase; font-size:.8rem; color:var(--ember); display:block; margin-top:2.4em}
+
+.divider{display:flex; align-items:center; justify-content:center; gap:16px; margin:3rem 0; color:var(--leather)}
+.divider::before,.divider::after{content:""; height:1px; width:90px; background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+.flame{width:12px;height:20px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%,#fff3c4,var(--amber) 55%,var(--ember) 90%,transparent);
+  box-shadow:0 0 12px 3px rgba(240,169,75,.5)}
+
+blockquote{
+  margin:2rem 0; padding:.4rem 0 .4rem 1.6rem; border-left:3px solid var(--ember);
+  font-family:var(--display); font-size:1.55rem; font-style:italic; color:var(--gold); line-height:1.4;
+}
+blockquote span{display:block; font-family:var(--label); font-style:normal; font-size:.72rem; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted); margin-top:.6rem}
+
+figure{margin:2.4rem 0}
+figure img{width:100%; border-radius:12px; border:1px solid var(--line2); box-shadow:0 18px 50px rgba(0,0,0,.5)}
+figcaption{margin-top:.7rem; font-size:.92rem; color:var(--muted); font-style:italic; text-align:center}
+
+/* backlit "screen" callout panel (cream / inverted) */
+.screen{
+  background:linear-gradient(180deg,#f8ecd2,#efdcb4); color:#3a230f; border-radius:14px;
+  padding:1.6rem 1.8rem; margin:2.2rem 0; border:1px solid #d8b378;
+  box-shadow:0 0 60px rgba(240,169,75,.16), inset 0 0 40px rgba(255,240,205,.7);
+}
+.screen h3{color:#8a4a1c; margin:.1em 0 .5em; font-size:1.35rem}
+.screen p{color:#4a2c14; margin-bottom:.6em}
+.screen strong{color:#7a3d12}
+.screen code{background:rgba(122,61,18,.1); color:#7a3d12}
+
+code{font-family:'Courier New',monospace; font-size:.86em; background:rgba(240,169,75,.1);
+  color:var(--gold); padding:2px 7px; border-radius:5px; border:1px solid var(--line)}
+pre{background:#0f0904; border:1px solid var(--line); border-radius:12px; padding:16px 18px; overflow:auto;
+  font-size:.82rem; line-height:1.6; color:var(--parch)}
+pre code{background:none;border:none;color:var(--parch);padding:0}
+
+ul{margin:0 0 1.3em; padding-left:1.3em}
+li{margin:.4em 0}
+li::marker{color:var(--ember)}
+
+/* ---------- video cuts ---------- */
+.cuts{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin:2rem 0}
+@media(max-width:680px){.cuts{grid-template-columns:1fr}}
+.cut{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 12px 34px rgba(0,0,0,.45)}
+.cut video{width:100%; display:block; background:#000; aspect-ratio:16/9}
+.cut .meta{padding:.9rem 1.1rem 1.1rem}
+.cut .meta h4{margin:0 0 .25rem; font-family:var(--display); font-size:1.3rem; color:var(--gold)}
+.cut .meta p{margin:0; font-size:.92rem; color:var(--muted)}
+.cut .tag{display:inline-block; font-family:var(--label); letter-spacing:1.5px; text-transform:uppercase;
+  font-size:.66rem; color:var(--night); background:var(--amber); padding:3px 9px; border-radius:6px; margin-bottom:.5rem}
+
+/* ---------- changelog timeline ---------- */
+.timeline{position:relative; margin:2rem 0; padding-left:30px}
+.timeline::before{content:""; position:absolute; left:7px; top:6px; bottom:6px; width:2px;
+  background:linear-gradient(180deg,var(--ember),var(--line),transparent)}
+.step{position:relative; margin:0 0 1.9rem}
+.step::before{content:""; position:absolute; left:-30px; top:6px; width:16px; height:16px; border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,#fff3c4,var(--amber) 60%,var(--ember));
+  box-shadow:0 0 12px 2px rgba(240,169,75,.5); border:2px solid var(--night)}
+.step h4{margin:0 0 .3rem; font-family:var(--display); font-size:1.32rem; color:var(--amber)}
+.step .file{font-family:'Courier New',monospace; font-size:.78rem; color:var(--leather)}
+.step p{margin:.4rem 0 0; font-size:.98rem; color:var(--text)}
+.pill{display:inline-block; font-family:var(--label); letter-spacing:1px; text-transform:uppercase; font-size:.6rem;
+  color:var(--gold); border:1px solid var(--line2); border-radius:999px; padding:2px 9px; margin-left:8px; vertical-align:middle}
+
+/* pipeline chips */
+.chips{display:flex; flex-wrap:wrap; gap:10px; margin:1.4rem 0 2rem}
+.chip{font-family:var(--label); letter-spacing:1px; font-size:.78rem; color:var(--parch);
+  background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:7px 15px}
+.chip b{color:var(--amber); font-weight:400}
+
+footer{border-top:1px solid var(--line); margin-top:4rem; padding:2.6rem 0 3.4rem; text-align:center; color:var(--muted); font-size:.9rem}
+footer .flame{display:inline-block; margin-bottom:1rem}
+footer a{color:var(--amber)}
+.note{font-size:.86rem; color:var(--muted); font-style:italic; border:1px dashed var(--line2); border-radius:10px; padding:.8rem 1.1rem; margin:1.4rem 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Togalu Gombeyaata × Generative AI</span>
+    <h1>The Lamp &amp; the Machine</h1>
+    <p class="sub">How I turned Karnataka's 500-year-old leather shadow-puppet theatre into an AI film studio — and told the story of <em>Kempegowda</em>, the founder of Bengaluru.</p>
+    <div class="lamps"><i class="lamp"></i><i class="lamp"></i><i class="lamp"></i><i class="lamp"></i><i class="lamp"></i><i class="lamp"></i><i class="lamp"></i></div>
+    <div class="byline">A build log · Sora 2 · Azure AI · Demucs · FFmpeg</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="lede">Under a banyan tree, a storyteller lights the brass oil lamps. Temple bells wake the night. The village settles onto the earth. And on a stretched cotton screen, backlit by fire, a legend begins to move — coloured leather puppets, perforated like lace, telling of a chieftain who dreamed a city into being.</p>
+
+  <p>That screen is <strong>Togalu Gombeyaata</strong>, the traditional shadow-puppet art of Karnataka. The legend is <strong>Kempegowda</strong>, the 16th-century Nadaprabhu who, in 1537, yoked a pair of white bullocks to a plough and furrowed the four cardinal streets of the town that became <strong>Bengaluru</strong>. And the whole thing — every puppet, every lamp, every voice — was generated and edited with AI, over a handful of evenings.</p>
+
+  <p>This is the build log: what I made, how I made it, the bugs I hit, and the two reusable <em>skills</em> that fell out of it.</p>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <span class="label">Act I</span>
+  <h2>The Images</h2>
+  <p>The visuals came from <strong>Sora 2</strong> (on Azure AI Foundry). The trick with a multi-scene film isn't generating a clip — it's stopping every clip from drifting. Independent generations wander: the hero's turban changes, the palette shifts, the backlit screen becomes a photoreal sunset. So I built a locked <em>Style Bible</em> and a five-beat grammar, injected verbatim into every scene.</p>
+
+  <blockquote>Invocation → Character → Journey → Conflict → Resolution → Moral.<span>the scene grammar, repeated for every clip</span></blockquote>
+
+  <p>A 25-scene, ~5-minute film rendered at twelve seconds a clip, then stitched with a shared warm-firelight colour grade and crossfades. Kempegowda stayed Kempegowda. The bullock-pair stayed a pair. The lamps never went out.</p>
+
+  <figure><img src="assets/img/hero.jpg" alt="Kempegowda shadow puppet with white bullocks under a banyan tree, backlit amber screen"><figcaption>The invocation — backlit leather puppets, brass oil lamps, a village audience in silhouette.</figcaption></figure>
+
+  <div class="screen">
+    <h3>🪔 The one bug that taught me the Style Bible</h3>
+    <p>Scene 3 (the <em>Journey</em>) drifted hard — a black night sky, palm silhouettes, a sunset, a single ornate bullock — while every other scene stayed on the flat amber screen. The culprit was one line in the skill's <strong>journey</strong> emphasis: <code>"movement across the screen past Indian landscapes, palaces, forests, rivers and temples."</code> Sora read it as <em>paint a real location</em>. I reworded it to keep all scenery as flat cut-leather silhouettes <strong>on the same backlit screen</strong> — regenerated the one scene, re-stitched, and the drift was gone.</p>
+  </div>
+
+  <figure><img src="assets/img/founding.jpg" alt="Kempegowda yoking a pair of white bullocks to a plough"><figcaption>Scene 8 — the rite of founding: a garlanded pair of white bullocks and the first furrow.</figcaption></figure>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <span class="label">Act II</span>
+  <h2>The Voice</h2>
+  <p>The first cut narrated itself beautifully… in <strong>Kannada</strong>. Sora speaks whatever language your style-bible names — my <code>audio</code> field had said <em>"a wise elder Kannada storyteller."</em> I confirmed it by transcribing the film with <strong>gpt-4o-transcribe</strong>, which read back fluent Kannada prose. Lovely — but I wanted an English cut.</p>
+
+  <p>Simply asking Sora for an English narrator worked. But I wanted more control — and, crucially, I wanted to <em>re-voice the film without losing its soul</em>: the veena, the mridangam, the temple bells and crickets Sora had generated.</p>
+
+  <blockquote>Keep the music. Change the voice.<span>the whole editing problem, in four words</span></blockquote>
+
+  <p>The catch: Sora bakes narration and music into a single track. So I used <strong>Demucs</strong> (a source-separation model) to split the film's audio into <em>vocals</em> (the old narration) and <em>everything else</em> (music + night ambience). I dropped the vocals, kept the music bed, and laid a fresh <strong>Azure Neural</strong> voice on top — gently side-chain ducking the music under the narration and remuxing onto the untouched video. The visuals never re-rendered; the music survived; the story changed.</p>
+
+  <figure><img src="assets/img/rises.jpg" alt="Bengaluru rises — four stone watchtowers on the backlit screen"><figcaption>Scene 20 — the city rises: four watchtowers mark the cardinal boundaries.</figcaption></figure>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <span class="label">Act III</span>
+  <h2>The Cast</h2>
+  <p>One narrator became a company. A warm <strong>male elder</strong> (en-IN-Prabhat) carried the through-line; a <strong>female voice</strong> (en-IN-Neerja, with <em>empathetic</em> and <em>cheerful</em> express-as styles) took the lyrical and joyful beats; and for the invocation, the rally, and the closing moral, <strong>both spoke</strong> — alternating lines, then a <em>unison</em> chant to end:</p>
+
+  <blockquote>Remember Kempegowda.<span>the finale — two voices, one line</span></blockquote>
+
+  <p>The first multi-voice cut had two problems, and both were honest lessons. The opener sounded <em>robotic</em> — I'd pushed the prosody too far (<code>-8%</code> rate, <code>-2st</code> pitch), and pitch-shifting artifacts crept in. And the narration <em>stopped after ninety seconds</em> — a real bug (more below). I softened every line to a gentle storyteller pace, fixed the offsets, and then reached for Azure's most human voices: the <strong>DragonHD</strong> family (en-IN-Arjun, en-IN-Neerja). They read so naturally that no segment needed any time-stretching at all. That became the flagship cut.</p>
+
+  <figure><img src="assets/img/gratitude.jpg" alt="The people gather in gratitude before Kempegowda"><figcaption>Scene 23 — the people bless the Nadaprabhu who gave them a home.</figcaption></figure>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <h2>The Four Voices</h2>
+  <p>Same film, four narrations — identical visuals, identical Sora music/ambience, four different storytellers. Here they are, side by side.</p>
+
+  <div class="cuts">
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/hero.jpg" src="assets/video/sora-english.mp4"></video>
+      <div class="meta"><span class="tag">Cut 1</span><h4>Sora-native English</h4><p>Narration generated by Sora itself — a different take per clip, music baked in.</p></div>
+    </div>
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/founding.jpg" src="assets/video/azure-single.mp4"></video>
+      <div class="meta"><span class="tag">Cut 2</span><h4>Azure — single voice</h4><p>One consistent Azure neural narrator; original Sora music retained via Demucs.</p></div>
+    </div>
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/rises.jpg" src="assets/video/multivoice.mp4"></video>
+      <div class="meta"><span class="tag">Cut 3</span><h4>Multi-voice + styles</h4><p>Male &amp; female with express-as styles, alternating lines, unison finale.</p></div>
+    </div>
+    <div class="cut">
+      <video controls preload="none" poster="assets/img/gratitude.jpg" src="assets/video/dragonhd.mp4"></video>
+      <div class="meta"><span class="tag">Cut 4 · flagship</span><h4>DragonHD — most natural</h4><p>Azure's ultra-realistic DragonHD voices. The most soothing, zero time-stretching.</p></div>
+    </div>
+  </div>
+  <p class="note">These are compressed 480p previews, self-hosted so the page works out of the box. Higher-quality versions are on their way to YouTube — the embeds will be swapped for the links.</p>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <h2>Under the Lamp — the Pipeline</h2>
+  <p>Everything runs on Azure with Microsoft Entra (AAD) auth — no API keys — orchestrated from the terminal.</p>
+  <div class="chips">
+    <span class="chip"><b>Sora 2</b> · shadow-puppet video</span>
+    <span class="chip"><b>gpt-4o-transcribe</b> · audio QA</span>
+    <span class="chip"><b>Azure AI Speech</b> · en-IN neural + DragonHD</span>
+    <span class="chip"><b>Demucs (htdemucs)</b> · music / voice separation</span>
+    <span class="chip"><b>FFmpeg</b> · stitch, duck, mix, remux</span>
+    <span class="chip"><b>Python 3.14</b> · glue</span>
+  </div>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <h2>The Craft Notes — every change, step by step</h2>
+  <p>Two reusable skills came out of this. Here is the exact sequence of changes I made to each.</p>
+
+  <h3>Skill 1 — <code>togalu-gombe-video</code> (the film generator)</h3>
+  <div class="timeline">
+    <div class="step"><h4>1 · Killed the Journey drift <span class="pill">consistency</span></h4>
+      <p class="file">scripts/generate_togalu_video.py · SCENE_EMPHASIS["journey"]</p>
+      <p>Reworded the journey beat so landscapes render as flat cut-leather silhouettes on the same backlit screen — never a photoreal location, night sky or sunset. Regenerated scene 3 and re-stitched.</p></div>
+    <div class="step"><h4>2 · Banished burned-in captions <span class="pill">quality</span></h4>
+      <p class="file">generate_togalu_video.py · "Avoid" block</p>
+      <p>Sora slipped a typo'd subtitle into one scene. Added <em>"no on-screen text, subtitles, captions, watermarks or written words"</em> to the negative prompt; regenerated the offending scene.</p></div>
+    <div class="step"><h4>3 · Made long films resumable <span class="pill">workflow</span></h4>
+      <p class="file">generate_togalu_video.py · run_storyboard()</p>
+      <p>Added <code>--resume</code> (skip scenes already rendered) and <code>--limit N</code> (pilot the first N) so a 25-scene, ~1-hour run can be piloted, interrupted, and continued.</p></div>
+    <div class="step"><h4>4 · Fixed a scene-ordering bug <span class="pill">bug</span></h4>
+      <p class="file">scripts/stitch_video.py · _scene_index()</p>
+      <p>The sorter grabbed the first <code>_&lt;digits&gt;_</code> in the filename — which matched the "5" in "5_min" — so clips stitched 10, 11, … 1, 20. Switched to the <em>last</em> numeric group.</p></div>
+    <div class="step"><h4>5 · Documented the narration-language knob <span class="pill">docs</span></h4>
+      <p class="file">SKILL.md · Audio Style</p>
+      <p>Captured the discovery: Sora narrates in whatever language the style-bible <code>audio</code> field names. Added a QA workflow (contact sheet + transcription) and the 25-scene, 5-minute English example.</p></div>
+  </div>
+
+  <h3>Skill 2 — <code>voice-dub</code> (re-voice any video, keep the music)</h3>
+  <div class="timeline">
+    <div class="step"><h4>6 · Built the dub engine <span class="pill">new skill</span></h4>
+      <p class="file">scripts/voice_dub.py</p>
+      <p>A dub-script (JSON) drives four stages: <em>separate</em> the music bed (Demucs) → <em>synthesize</em> each segment (Azure neural) → <em>duck &amp; mix</em> narration over the bed → <em>remux</em> onto the original video (<code>-c:v copy</code>, so visuals are untouched).</p></div>
+    <div class="step"><h4>7 · Azure Speech over AAD <span class="pill">auth</span></h4>
+      <p class="file">scripts/azure_speech.py</p>
+      <p>Keys are disabled on the resource, so TTS calls use the Entra format <code>Authorization: Bearer aad#{resourceId}#{token}</code> against the regional Speech endpoint, with SSML for express-as styles + prosody.</p></div>
+    <div class="step"><h4>8 · Demucs without torchcodec <span class="pill">py3.14</span></h4>
+      <p class="file">scripts/separate_music.py</p>
+      <p>On Python 3.14, <code>torchaudio.save</code> now demands <code>torchcodec</code>. Sidestepped it by running Demucs through its Python API and writing the stem with <code>soundfile</code>.</p></div>
+    <div class="step"><h4>9 · One-speaker &amp; multi-speaker <span class="pill">feature</span></h4>
+      <p class="file">references/*.dubscript.json</p>
+      <p>Segments assign a voice per scene; two utterances in a segment alternate (male → female); a <code>"unison": true</code> utterance overlays voices into a short chorus for shared lines.</p></div>
+    <div class="step"><h4>10 · Fixed the "narration stops at 1:30" bug <span class="pill">bug</span></h4>
+      <p class="file">voice_dub.py · scene_offsets()</p>
+      <p>The offset math scanned the clips folder — and counted the ~292-second <em>output</em> films as if they were scenes, pushing later narration past the end of the video. Added a duration-outlier + name filter so finished cuts can safely sit in the same folder.</p></div>
+    <div class="step"><h4>11 · De-robotified the delivery <span class="pill">tuning</span></h4>
+      <p class="file">dubscript prosody</p>
+      <p>Softened aggressive prosody (dropped <code>-8%</code>/<code>-2st</code>) to a gentle <code>-3%</code> base, and kept lines short so no segment needed <code>atempo &gt; 1.2×</code> — the two main sources of "robotic" audio.</p></div>
+    <div class="step"><h4>12 · Added DragonHD + wrote the recipes <span class="pill">docs</span></h4>
+      <p class="file">SKILL.md · schema · examples</p>
+      <p>Discovered DragonHD voices honor prosody but ignore express-as styles (and need no time-stretch). Folded the casting, alternating/unison, anti-robotic prosody, and full-film-span QA lessons into the skill.</p></div>
+  </div>
+
+  <figure><img src="assets/img/mosaic.jpg" alt="A 5x5 contact sheet of all 25 shadow-puppet scenes"><figcaption>The QA contact sheet — one frame from each of the 25 scenes, checked for consistency at a glance.</figcaption></figure>
+
+  <div class="divider"><i class="flame"></i></div>
+
+  <h2>Moral</h2>
+  <blockquote>A city is not built by stone alone, but by far-seeing vision and selfless service.<span>the elder's closing line</span></blockquote>
+  <p>Kempegowda ploughed four furrows and imagined a city that would outgrow his sight by four centuries. Working on this, it struck me that AI is best when it does the same for our heritage — not replacing the puppeteer's lamp, but carrying its light to a new screen. The craft is 500 years old. It just found a longer run.</p>
+  <p>What folk story from <em>your</em> culture would you bring back to life under the lamp?</p>
+
+</main>
+
+<footer>
+  <div class="flame"></div>
+  <div class="wrap">
+    <p>Built with Sora 2, Azure AI Speech (DragonHD), gpt-4o-transcribe, Demucs &amp; FFmpeg — orchestrated from the terminal.<br>
+    Story: <strong>Kempegowda</strong>, founder of Bengaluru (1537) · Art: <strong>Togalu Gombeyaata</strong>, Karnataka.</p>
+    <p>© 2026 · <a href="https://github.com/naveenneog/Sora-Azure-MultiPart-Video-Editing">Sora-Azure-MultiPart-Video-Editing</a> on GitHub</p>
+  </div>
+</footer>
+
+</body>
+</html>
